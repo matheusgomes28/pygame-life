@@ -2,21 +2,15 @@ import pygame
 import sys
 import time
 
-from collections import namedtuple
 from copy import deepcopy
+from example_grids import gosper_glider
 
-Point = namedtuple("Point", ["x", "y"])
-Dim = namedtuple("Dimension", ["width", "height"])
-Grid = namedtuple("Grid", ["dim", "cells"])
-
-def make_grid(width, height):
-    return Grid(Dim(width, height), set())
-
-def init_graphics(settings):
+def init_graphics(width, height):
 
     pygame.init()
-    screen = pygame.display.set_mode((settings["window_width"], settings["window_height"]))
+    screen = pygame.display.set_mode((width, height))
     return screen
+
 
 def draw_grid(screen, grid):
 
@@ -27,86 +21,58 @@ def draw_grid(screen, grid):
         rect = pygame.Rect(x*cell_width+2, y*cell_height+2, cell_width-2, cell_height-2)
         pygame.draw.rect(screen, (255, 0, 0), rect)
 
-def in_range(grid, x, y):
-    return x >= 0 and x < grid.dim.x and y >= 0 and y < grid.dim.y
 
-def get_neighbours(grid, x, y):
-    width = grid.dim.width
-    height = grid.dim.height
+def get_alive_neighbours(grid, x, y):
 
     dirs = [(-1, -1), (0, -1), (1, -1), (-1,  0), (1,  0), (-1, 1), (0, 1), (1, 1)]
     positions = [(x + xAdd, y + yAdd) for xAdd, yAdd in dirs]
-    return [(pos[0], pos[1]) for pos in positions if pos in grid.cells]
+    return set([(pos[0], pos[1]) for pos in positions if pos in grid.cells])
 
-def check_dead(neighbours):
-    num_neighbours = len(neighbours)
-    return num_neighbours < 2 or num_neighbours > 3
 
-def check_alive(neighbours):
-    num_neighbours = len(neighbours)
-    return num_neighbours == 3
+def get_dead_neighbours(grid, x, y):
 
-def set_cell(grid, x, y):
-    grid.cells.add((x, y))
+    dirs = [(-1, -1), (0, -1), (1, -1), (-1,  0), (1,  0), (-1, 1), (0, 1), (1, 1)]
+    positions = [(x + xAdd, y + yAdd) for xAdd, yAdd in dirs]
+    return set([(pos[0], pos[1]) for pos in positions if pos not in grid.cells])
 
-def unset_cell(grid, x, y):
-    grid.cells.remove((x, y))
 
 def update_grid(grid):
     new_grid = deepcopy(grid)
-
     undead = {}
 
-    # Check if alive cells need to die
     for (x, y) in grid.cells:
-        neighbours = get_neighbours(grid, x, y)
-        if len(neighbours) < 2 or len(neighbours) > 3:
-            unset_cell(new_grid, x, y)
+        alive_neighbours = get_alive_neighbours(grid, x, y)
+        if len(alive_neighbours) < 2 or len(alive_neighbours) > 3:
+            new_grid.cells.remove((x, y))
 
-        for pos in neighbours:
-            if pos in undead:
+        for pos in get_dead_neighbours(grid, x, y):
+            if pos in undead.keys():
                 undead[pos] += 1
             else:
                 undead[pos] = 1
-        print("!!!", undead)
 
     for k, v in undead.items():
         if v == 3:
-            set_cell(new_grid, k[0], k[1])
-
+            new_grid.cells.add((k[0], k[1]))
 
     return new_grid
 
 
 if __name__ == "__main__":
 
-    settings = {
-        "window_width": 600,
-        "window_height": 400,
-    }
-
-    colours = {
-        "black": (0, 0, 0)
-    }
-
-    grid = make_grid(10, 10)
-    set_cell(grid, 3, 3)
-    set_cell(grid, 4, 3)
-    set_cell(grid, 5, 3)
-
-    screen = init_graphics(settings)
+    grid = gosper_glider
+    screen = init_graphics(600, 400)
+    print(grid)
 
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sys.exit(0)
 
-        screen.fill(colours["black"])
+        screen.fill((0, 0, 0))
 
         draw_grid(screen, grid)
         grid = update_grid(grid)
         pygame.display.flip()
 
-        time.sleep(0.5)
-
-    print("bye bye!")
+        time.sleep(0.2)
