@@ -1,43 +1,42 @@
 import sys
 import time
-
 from collections import defaultdict
 from copy import deepcopy
-from example_grids import gosper_glider
+
 import pygame
+
+from example_grids import gosper_glider
+from grid_defs import Grid
+
+adjacent_dirs = [(-1, -1), (0, -1), (1, -1), (-1, 0),
+                 (1, 0), (-1, 1), (0, 1), (1, 1)]
 
 
 def get_alive_neighbours(grid, x, y):
-    adjacent_dirs = [(-1, -1), (0, -1), (1, -1), (-1, 0),
-                     (1, 0), (-1, 1), (0, 1), (1, 1)]
     positions = [(x + xAdd, y + yAdd) for xAdd, yAdd in adjacent_dirs]
     return {(pos[0], pos[1]) for pos in positions if pos in grid.cells}
 
 
 def get_dead_neighbours(grid, x, y):
-    adjacent_dirs = [(-1, -1), (0, -1), (1, -1), (-1, 0),
-                     (1, 0), (-1, 1), (0, 1), (1, 1)]
     positions = [(x + xAdd, y + yAdd) for xAdd, yAdd in adjacent_dirs]
     return {(pos[0], pos[1]) for pos in positions if pos not in grid.cells}
 
 
 def update_grid(grid):
-    new_grid = deepcopy(grid)
+    new_cells = deepcopy(grid.cells)
     undead = defaultdict(int)
 
     for (x, y) in grid.cells:
-        alive_neighbours = get_alive_neighbours(grid, x, y)
-        if len(alive_neighbours) < 2 or len(alive_neighbours) > 3:
-            new_grid.cells.remove((x, y))
+        if len(get_alive_neighbours(grid, x, y)) not in [2, 3]:
+            new_cells.remove((x, y))
 
         for pos in get_dead_neighbours(grid, x, y):
             undead[pos] += 1
 
-    for pos, neighbours in undead.items():
-        if neighbours == 3:
-            new_grid.cells.add((pos[0], pos[1]))
+    for pos, _ in filter(lambda elem: elem[1] == 3, undead.items()):
+        new_cells.add((pos[0], pos[1]))
 
-    return new_grid
+    return Grid(grid.dim, new_cells)
 
 
 def draw_grid(screen, grid):
@@ -62,12 +61,10 @@ def main():
             sys.exit(0)
 
         screen.fill((0, 0, 0))
-
         draw_grid(screen, grid)
         grid = update_grid(grid)
         pygame.display.flip()
-
-        time.sleep(0.2)
+        time.sleep(0.1)
 
 
 if __name__ == "__main__":
