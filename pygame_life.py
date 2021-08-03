@@ -8,13 +8,15 @@ import pygame
 
 
 def get_alive_neighbours(grid, x, y):
-    adjacent_dirs = [(-1, -1), (0, -1), (1, -1), (-1, 0), (1, 0), (-1, 1), (0, 1), (1, 1)]
+    adjacent_dirs = [(-1, -1), (0, -1), (1, -1), (-1, 0),
+                     (1, 0), (-1, 1), (0, 1), (1, 1)]
     positions = [(x + xAdd, y + yAdd) for xAdd, yAdd in adjacent_dirs]
     return {(pos[0], pos[1]) for pos in positions if pos in grid.cells}
 
 
 def get_dead_neighbours(grid, x, y):
-    adjacent_dirs = [(-1, -1), (0, -1), (1, -1), (-1, 0), (1, 0), (-1, 1), (0, 1), (1, 1)]
+    adjacent_dirs = [(-1, -1), (0, -1), (1, -1), (-1, 0),
+                     (1, 0), (-1, 1), (0, 1), (1, 1)]
     positions = [(x + xAdd, y + yAdd) for xAdd, yAdd in adjacent_dirs]
     return {(pos[0], pos[1]) for pos in positions if pos not in grid.cells}
 
@@ -43,7 +45,8 @@ def draw_grid(screen, grid):
     cell_height = screen.get_height()/grid.dim.height
 
     for (x, y) in grid.cells:
-        rect = pygame.Rect(x*cell_width+2, y*cell_height+2, cell_width-2, cell_height-2)
+        rect = pygame.Rect(x*cell_width+2, y*cell_height +
+                           2, cell_width-2, cell_height-2)
         pygame.draw.rect(screen, (255, 0, 0), rect)
 
 
