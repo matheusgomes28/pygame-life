@@ -29,6 +29,6 @@ python pygame_life.py
 
 ## Understand The Code
 
-This game was created for a post in my [personal blog](https://matgomes.com/).
-The intention was to show that, by keeping it simple, the game
-can be implemented elegantly in a few lines of code.
+This game was created for a post in my https://matgomes.com/.
+The intention was to show that, by keeping it simple, [https://matgomes.com/conways-game-of-life-python/](Conway's Game Of Life 
+can be implemented in a few lines of Python).
